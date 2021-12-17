@@ -1,9 +1,4 @@
-from flask import Flask
+from storyline import create_app
 
-app = Flask("Storyline")
-
-@app.route('/')
-def index():
-    return 'Web App with Python Flask!'
-
+app = create_app()
 app.run(host='0.0.0.0', port=81)
