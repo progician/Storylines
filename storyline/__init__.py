@@ -1,12 +1,38 @@
-from flask import Flask, request
+from flask import (
+    Flask,
+    request,
+)
 from json import dumps
+from pathlib import Path
+from subprocess import run
+
+
+def type_of_dir(dir_path):
+    if (dir_path / '.git').exists():
+        return "worktree"
+    else:
+        git_process = run(["git", "rev-parse", "--git-dir"], cwd=dir_path)
+        if git_process.returncode == 0:
+            return "bare"
+        return "directory"
+
 
 def create_app():
     app = Flask('Storyline')
 
-    @app.route('/api/repository')
-    def repository():
-        if request.method == 'GET':
-            return dumps([])
+    @app.route('/api/dirs/<path:path>')
+    def dirs(path):
+        p = Path(f'/{path}')
+        directories = [child for child in p.iterdir() if child.is_dir()]
+
+        results = []
+        for dir in directories:
+            if (dir / '.git').exists:
+                results.append({
+                    'name': dir.name,
+                    'type': type_of_dir(dir),
+                })
+
+        return dumps(results)
 
     return app
