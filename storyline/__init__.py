@@ -20,8 +20,12 @@ def type_of_dir(dir_path):
 def create_app():
     app = Flask('Storyline')
 
+    @app.route('/api/dirs', defaults={'path': None})
     @app.route('/api/dirs/<path:path>')
     def dirs(path):
+        if path is None:
+            path = Path.home()
+
         p = Path(f'/{path}')
         directories = [child for child in p.iterdir() if child.is_dir()]
 
@@ -34,5 +38,11 @@ def create_app():
                 })
 
         return dumps(results)
+
+    
+    @app.route('/', defaults={'path': 'index.html'})
+    @app.route('/<path:path>')
+    def catch_all_statics(path):
+        return app.send_static_file(path)
 
     return app
